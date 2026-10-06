@@ -12,7 +12,7 @@
     --line:#243056; --text:#e8ecf8; --muted:#8a97bd;
     --accent:#00e0a4; --accent2:#ffd166; --live:#ff4d6d;
     --story-w:1080px; --story-h:1920px;
-    --safe-top:269px; --safe-bottom:1536px;
+    --safe-top:269px;
   }
   *{box-sizing:border-box}
   body{
@@ -29,22 +29,21 @@
   .btn:hover{background:#22305c}
   .btn.primary{background:linear-gradient(135deg,var(--accent),#00b386); color:#052018; border:0}
   .btn.primary:hover{filter:brightness(1.08)}
+  .btn:disabled{opacity:.7; cursor:wait}
 
   /* ===== إطار الستوري 1080×1920 ===== */
   .story-frame{
     width:var(--story-w); height:var(--story-h);
     background:linear-gradient(170deg,#0a1229 0%,#080e1f 40%,#0d1530 100%);
-    position:relative; overflow:hidden; margin:0 auto;
+    position:relative; overflow:hidden;
     font-family:'Cairo',sans-serif;
   }
-  /* توهج علوي */
   .story-frame::before{
     content:''; position:absolute; top:-200px; left:50%; transform:translateX(-50%);
     width:800px; height:600px;
     background:radial-gradient(ellipse,rgba(0,224,164,.12) 0%,transparent 70%);
     pointer-events:none;
   }
-  /* توهج سفلي */
   .story-frame::after{
     content:''; position:absolute; bottom:-150px; left:50%; transform:translateX(-50%);
     width:700px; height:500px;
@@ -58,7 +57,6 @@
     height:100%; display:flex; flex-direction:column;
   }
 
-  /* رأس الستوري */
   .story-header{text-align:center; margin-bottom:36px; flex-shrink:0}
   .story-header .date-label{
     display:inline-block; background:rgba(0,224,164,.12);
@@ -68,14 +66,12 @@
   }
   .story-header h1{
     margin:0; font-size:52px; font-weight:900; letter-spacing:-.5px;
-    background:linear-gradient(135deg,#fff 0%,#9fb0dd 100%);
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    color:#fff;
   }
   .story-header .sub{
     margin-top:10px; font-size:20px; color:var(--muted); font-weight:600;
   }
 
-  /* قائمة المباريات */
   .matches-list{
     flex:1; display:flex; flex-direction:column; gap:14px;
     overflow:hidden; justify-content:center;
@@ -94,33 +90,32 @@
   }
 
   .match-time{
-    flex-shrink:0; text-align:center; min-width:90px;
+    flex-shrink:0; text-align:center; min-width:100px;
     padding-left:16px; border-left:1px solid var(--line);
   }
   .match-time .t{
-    font-size:30px; font-weight:800; color:var(--accent2);
+    font-size:32px; font-weight:800; color:var(--accent2);
     line-height:1.1; direction:ltr;
   }
-  .match-time .ampm{font-size:14px; color:var(--muted); font-weight:600}
+  .match-time .ampm{font-size:16px; color:var(--muted); font-weight:700; margin-top:2px}
 
   .match-teams{flex:1; min-width:0}
   .team-row{display:flex; align-items:center; gap:10px; margin-bottom:6px}
   .team-row:last-child{margin-bottom:0}
   .team-logo{
-    width:34px; height:34px; border-radius:50%; flex-shrink:0;
-    display:grid; place-items:center; font-size:14px; font-weight:800; color:#03121f;
+    width:36px; height:36px; border-radius:50%; flex-shrink:0;
+    display:grid; place-items:center; font-size:15px; font-weight:800; color:#03121f;
     background:linear-gradient(135deg,#ffd166,#ff8fab);
   }
   .team-logo.b{background:linear-gradient(135deg,#4cc9f0,#7bdff2)}
-  .team-name{font-size:24px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .team-name{font-size:26px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 
   .match-comp{
-    flex-shrink:0; text-align:left; max-width:180px;
+    flex-shrink:0; text-align:left; max-width:190px;
     font-size:14px; color:var(--muted); font-weight:600; line-height:1.4;
   }
   .match-comp .venue{font-size:12px; color:#5f6f9a; display:block; margin-top:4px}
 
-  /* تذييل */
   .story-footer{
     flex-shrink:0; text-align:center; margin-top:24px;
     padding-top:20px; border-top:1px solid var(--line);
@@ -131,24 +126,26 @@
   }
   .story-footer .tag{font-size:14px; color:var(--muted); margin-top:4px}
 
-  /* حالة فارغة */
   .empty-state{
     flex:1; display:flex; flex-direction:column; align-items:center;
     justify-content:center; color:var(--muted); gap:12px;
+    font-size:22px;
   }
   .empty-state .icon{font-size:64px; opacity:.5}
 
-  /* معاينة مصغرة على الشاشة */
+  /* ===== معاينة مصغرة (الحجم يضبطه JS) ===== */
   .preview-wrap{
-    width:100%; max-width:420px; margin:0 auto;
-    border-radius:16px; overflow:hidden;
+    width:100%; max-width:400px; margin:0 auto;
+    position:relative; overflow:hidden;
+    border-radius:16px;
     box-shadow:0 20px 60px rgba(0,0,0,.5);
+    background:#080e1f;
   }
   .preview-wrap .story-frame{
-    transform:scale(.388); transform-origin:top center;
-    width:var(--story-w); height:var(--story-h);
+    position:absolute;
+    top:0; right:0;
+    transform-origin: top right;
   }
-  .preview-wrap{height:calc(1920px * .388)}
 </style>
 </head>
 <body>
@@ -159,7 +156,7 @@
   <button class="btn primary" id="downloadBtn">⬇ تحميل الستوري</button>
 </div>
 
-<div class="preview-wrap">
+<div class="preview-wrap" id="previewWrap">
   <div class="story-frame" id="storyFrame">
     <div class="story-inner" id="storyInner">
       <div class="empty-state">
@@ -176,10 +173,8 @@
    ============================================================ */
 const CONFIG = {
   timezone: 'Asia/Riyadh',
-  maxMatches: 8,          // أقصى عدد مباريات يظهر في الستوري
-  proxyUrl: 'https://api.allorigins.win/raw?url=',  // وسيط CORS
-  useDemo: true,          // true = بيانات تجريبية | false = كشط كووورة
-  koooraUrl: 'https://www.kooora.com/?c=matches'
+  maxMatches: 8,
+  useDemo: true,   // true = بيانات تجريبية | false = كشط كووورة (لاحقاً)
 };
 
 /* ============================================================
@@ -203,51 +198,27 @@ function demoData(date){
 }
 
 /* ============================================================
-   كشط كووورة (يعمل عبر وسيط CORS)
-   ============================================================ */
-async function fetchFromKooora(date){
-  const url = `${CONFIG.proxyUrl}${encodeURIComponent(CONFIG.koooraUrl)}`;
-  const res = await fetch(url);
-  if(!res.ok) throw new Error('فشل الاتصال بكووورة');
-  const html = await res.text();
-  const doc = new DOMParser().parseFromString(html, 'text/html');
-
-  const matches = [];
-  // ملاحظة: محددات CSS هذه تقديرية — راجع بنية HTML الفعلية
-  // وعدّلها بحسب ما تراه في المتصفح (أدوات المطور)
-  doc.querySelectorAll('.matchesList li, .match-item, tr[data-match]').forEach(el => {
-    const teams = el.querySelectorAll('.teamName, .team, .tm');
-    const time  = el.querySelector('.matchTime, .time, time');
-    const comp  = el.querySelector('.champName, .competition, .league');
-    if(teams.length >= 2){
-      matches.push({
-        competition: comp?.textContent?.trim() || '—',
-        homeTeam: teams[0].textContent.trim(),
-        awayTeam: teams[1].textContent.trim(),
-        kickoff: time?.textContent?.trim() || '',
-        venue: ''
-      });
-    }
-  });
-  if(!matches.length) throw new Error('لم يتم العثور على مباريات');
-  return matches;
-}
-
-/* ============================================================
-   أدوات مساعدة
+   أدوات
    ============================================================ */
 const $ = id => document.getElementById(id);
-const todayISO = () => new Date().toISOString().slice(0,10);
+const todayISO = () => {
+  const d = new Date();
+  const off = d.getTimezoneOffset();
+  return new Date(d.getTime() - off*60000).toISOString().slice(0,10);
+};
 
 function fmtTime(iso){
   try{
     const d = new Date(iso);
     if(isNaN(d)) return {t:'--:--', ampm:''};
-    const str = d.toLocaleTimeString('ar-EG',{
-      hour:'2-digit', minute:'2-digit', hour12:true, timeZone:CONFIG.timezone
+    const s = d.toLocaleString('en-US', {
+      timeZone:'Asia/Riyadh', hour12:false, hour:'2-digit', minute:'2-digit'
     });
-    const [time, ampm] = str.split(' ');
-    return {t: time.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)), ampm: ampm||''};
+    const [h, m] = s.split(':').map(Number);
+    const ampm = h >= 12 ? 'م' : 'ص';
+    const h12 = (h % 12) || 12;
+    const pad = n => String(n).padStart(2,'0');
+    return { t: `${pad(h12)}:${pad(m)}`, ampm };
   }catch{ return {t:'--:--', ampm:''}; }
 }
 
@@ -266,7 +237,7 @@ function renderStory(matches, dateStr){
     inner.innerHTML = `
       <div class="empty-state">
         <div class="icon">⚽</div>
-        <div style="font-size:22px">لا توجد مباريات اليوم</div>
+        <div>لا توجد مباريات اليوم</div>
       </div>`;
     return;
   }
@@ -308,10 +279,26 @@ function renderStory(matches, dateStr){
       <div class="brand">⚽ جدول المباريات</div>
       <div class="tag">تابعنا لكل جديد</div>
     </div>`;
+
+  updatePreviewScale();
 }
 
 /* ============================================================
-   تحميل البيانات
+   ضبط حجم المعاينة تلقائياً
+   ============================================================ */
+function updatePreviewScale(){
+  const wrap  = $('previewWrap');
+  const frame = $('storyFrame');
+  const availW = wrap.clientWidth;
+  const scale  = availW / 1080;
+  frame.style.transform = `scale(${scale})`;
+  wrap.style.height = (1920 * scale) + 'px';
+}
+window.addEventListener('resize', updatePreviewScale);
+window.addEventListener('orientationchange', () => setTimeout(updatePreviewScale, 200));
+
+/* ============================================================
+   التحميل
    ============================================================ */
 async function load(){
   const date = $('datePicker').value || todayISO();
@@ -322,21 +309,14 @@ async function load(){
   $('storyInner').innerHTML = `<div class="empty-state"><div>جارٍ التحميل...</div></div>`;
 
   try{
-    let matches;
-    if(CONFIG.useDemo){
-      matches = demoData(date);
-    }else{
-      matches = await fetchFromKooora(date);
-    }
-    // ترتيب حسب الوقت
+    let matches = demoData(date);
     matches.sort((a,b) => new Date(a.kickoff) - new Date(b.kickoff));
     renderStory(matches, dateStr);
   }catch(err){
     $('storyInner').innerHTML = `
       <div class="empty-state">
         <div class="icon">⚠️</div>
-        <div style="font-size:18px">${err.message}</div>
-        <div style="font-size:14px;opacity:.6">جرّب تفعيل الوضع التجريبي</div>
+        <div>${err.message}</div>
       </div>`;
   }
 }
@@ -350,16 +330,18 @@ async function downloadStory(){
   btn.textContent = '⏳ جارٍ التصدير...';
   btn.disabled = true;
 
+  // نزيل التحويل مؤقتاً حتى لا يتأثر التصدير
+  const savedTransform = frame.style.transform;
+  frame.style.transform = 'none';
+
   try{
     const canvas = await html2canvas(frame, {
       width: 1080,
       height: 1920,
-      scale: 1,                    // الدقة مضبوطة من الأبعاد نفسها
+      scale: 1,
       backgroundColor: '#080e1f',
       useCORS: true,
-      logging: false,
-      windowWidth: 1080,
-      windowHeight: 1920
+      logging: false
     });
 
     canvas.toBlob(blob => {
@@ -376,6 +358,8 @@ async function downloadStory(){
     alert('فشل التصدير: ' + err.message);
     btn.textContent = '⬇ تحميل الستوري';
     btn.disabled = false;
+  }finally{
+    frame.style.transform = savedTransform;
   }
 }
 
