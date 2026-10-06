@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>مباريات اليوم - ستوري</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+  :root{
+    --bg:#080e1f; --card:#111a33; --card2:#1a2444;
+    --line:#243056; --text:#e8ecf8; --muted:#8a97bd;
+    --accent:#00e0a4; --accent2:#ffd166; --live:#ff4d6d;
+    --story-w:1080px; --story-h:1920px;
+    --safe-top:269px; --safe-bottom:1536px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:'Cairo',system-ui,sans-serif;
+    background:radial-gradient(1200px 600px at 20% -10%,#17224a 0%,var(--bg) 60%);
+    color:var(--text); min-height:100vh; padding:16px;
+  }
+  .controls{max-width:600px;margin:0 auto 20px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+  .btn{
+    background:var(--card2); color:var(--text); border:1px solid var(--line);
+    padding:10px 16px; border-radius:10px; cursor:pointer; font-family:inherit;
+    font-size:14px; font-weight:600; transition:.15s;
+  }
+  .btn:hover{background:#22305c}
+  .btn.primary{background:linear-gradient(135deg,var(--accent),#00b386); color:#052018; border:0}
+  .btn.primary:hover{filter:brightness(1.08)}
+
+  /* ===== إطار الستوري 1080×1920 ===== */
+  .story-frame{
+    width:var(--story-w); height:var(--story-h);
+    background:linear-gradient(170deg,#0a1229 0%,#080e1f 40%,#0d1530 100%);
+    position:relative; overflow:hidden; margin:0 auto;
+    font-family:'Cairo',sans-serif;
+  }
+  /* توهج علوي */
+  .story-frame::before{
+    content:''; position:absolute; top:-200px; left:50%; transform:translateX(-50%);
+    width:800px; height:600px;
+    background:radial-gradient(ellipse,rgba(0,224,164,.12) 0%,transparent 70%);
+    pointer-events:none;
+  }
+  /* توهج سفلي */
+  .story-frame::after{
+    content:''; position:absolute; bottom:-150px; left:50%; transform:translateX(-50%);
+    width:700px; height:500px;
+    background:radial-gradient(ellipse,rgba(255,209,102,.08) 0%,transparent 70%);
+    pointer-events:none;
+  }
+
+  .story-inner{
+    position:relative; z-index:1;
+    padding: var(--safe-top) 60px 60px 60px;
+    height:100%; display:flex; flex-direction:column;
+  }
+
+  /* رأس الستوري */
+  .story-header{text-align:center; margin-bottom:36px; flex-shrink:0}
+  .story-header .date-label{
+    display:inline-block; background:rgba(0,224,164,.12);
+    color:var(--accent); font-size:22px; font-weight:700;
+    padding:8px 24px; border-radius:999px; margin-bottom:14px;
+    border:1px solid rgba(0,224,164,.25);
+  }
+  .story-header h1{
+    margin:0; font-size:52px; font-weight:900; letter-spacing:-.5px;
+    background:linear-gradient(135deg,#fff 0%,#9fb0dd 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .story-header .sub{
+    margin-top:10px; font-size:20px; color:var(--muted); font-weight:600;
+  }
+
+  /* قائمة المباريات */
+  .matches-list{
+    flex:1; display:flex; flex-direction:column; gap:14px;
+    overflow:hidden; justify-content:center;
+  }
+
+  .match-card{
+    background:linear-gradient(135deg,rgba(17,26,51,.9),rgba(26,36,68,.9));
+    border:1px solid var(--line); border-radius:20px;
+    padding:20px 24px; display:flex; align-items:center; gap:16px;
+    position:relative; overflow:hidden;
+  }
+  .match-card::before{
+    content:''; position:absolute; right:0; top:0; bottom:0; width:4px;
+    background:linear-gradient(180deg,var(--accent),var(--accent2));
+    border-radius:4px 0 0 4px;
+  }
+
+  .match-time{
+    flex-shrink:0; text-align:center; min-width:90px;
+    padding-left:16px; border-left:1px solid var(--line);
+  }
+  .match-time .t{
+    font-size:30px; font-weight:800; color:var(--accent2);
+    line-height:1.1; direction:ltr;
+  }
+  .match-time .ampm{font-size:14px; color:var(--muted); font-weight:600}
+
+  .match-teams{flex:1; min-width:0}
+  .team-row{display:flex; align-items:center; gap:10px; margin-bottom:6px}
+  .team-row:last-child{margin-bottom:0}
+  .team-logo{
+    width:34px; height:34px; border-radius:50%; flex-shrink:0;
+    display:grid; place-items:center; font-size:14px; font-weight:800; color:#03121f;
+    background:linear-gradient(135deg,#ffd166,#ff8fab);
+  }
+  .team-logo.b{background:linear-gradient(135deg,#4cc9f0,#7bdff2)}
+  .team-name{font-size:24px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+
+  .match-comp{
+    flex-shrink:0; text-align:left; max-width:180px;
+    font-size:14px; color:var(--muted); font-weight:600; line-height:1.4;
+  }
+  .match-comp .venue{font-size:12px; color:#5f6f9a; display:block; margin-top:4px}
+
+  /* تذييل */
+  .story-footer{
+    flex-shrink:0; text-align:center; margin-top:24px;
+    padding-top:20px; border-top:1px solid var(--line);
+  }
+  .story-footer .brand{
+    font-size:18px; font-weight:800; color:var(--accent);
+    letter-spacing:.5px;
+  }
+  .story-footer .tag{font-size:14px; color:var(--muted); margin-top:4px}
+
+  /* حالة فارغة */
+  .empty-state{
+    flex:1; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; color:var(--muted); gap:12px;
+  }
+  .empty-state .icon{font-size:64px; opacity:.5}
+
+  /* معاينة مصغرة على الشاشة */
+  .preview-wrap{
+    width:100%; max-width:420px; margin:0 auto;
+    border-radius:16px; overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+  }
+  .preview-wrap .story-frame{
+    transform:scale(.388); transform-origin:top center;
+    width:var(--story-w); height:var(--story-h);
+  }
+  .preview-wrap{height:calc(1920px * .388)}
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <input type="date" id="datePicker" style="background:#1a2444;border:1px solid #243056;color:#e8ecf8;padding:10px 14px;border-radius:10px;font-family:inherit;font-size:14px">
+  <button class="btn" id="refreshBtn">↻ تحديث</button>
+  <button class="btn primary" id="downloadBtn">⬇ تحميل الستوري</button>
+</div>
+
+<div class="preview-wrap">
+  <div class="story-frame" id="storyFrame">
+    <div class="story-inner" id="storyInner">
+      <div class="empty-state">
+        <div class="icon">⚽</div>
+        <div>جارٍ التحميل...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   الإعدادات — غيّر هنا فقط
+   ============================================================ */
+const CONFIG = {
+  timezone: 'Asia/Riyadh',
+  maxMatches: 8,          // أقصى عدد مباريات يظهر في الستوري
+  proxyUrl: 'https://api.allorigins.win/raw?url=',  // وسيط CORS
+  useDemo: true,          // true = بيانات تجريبية | false = كشط كووورة
+  koooraUrl: 'https://www.kooora.com/?c=matches'
+};
+
+/* ============================================================
+   بيانات تجريبية
+   ============================================================ */
+function demoData(date){
+  return [
+    {competition:'كأس الخليج 27', homeTeam:'السعودية', awayTeam:'الإمارات',
+     kickoff:`${date}T18:00:00+03:00`, venue:'استاد جابر الأحمد'},
+    {competition:'دوري روشن السعودي', homeTeam:'الاتحاد', awayTeam:'الأهلي',
+     kickoff:`${date}T19:00:00+03:00`, venue:'ملعب الجوهرة'},
+    {competition:'الدوري المصري', homeTeam:'الأهلي', awayTeam:'الزمالك',
+     kickoff:`${date}T20:30:00+03:00`, venue:'استاد القاهرة'},
+    {competition:'دوري روشن السعودي', homeTeam:'الهلال', awayTeam:'النصر',
+     kickoff:`${date}T21:00:00+03:00`, venue:'ملعب المملكة أرينا'},
+    {competition:'دوري أبطال أوروبا', homeTeam:'ريال مدريد', awayTeam:'مانشستر سيتي',
+     kickoff:`${date}T22:00:00+03:00`, venue:'سانتياغو برنابيو'},
+    {competition:'دوري أبطال أوروبا', homeTeam:'بايرن ميونخ', awayTeam:'ليفربول',
+     kickoff:`${date}T22:00:00+03:00`, venue:'أليانز أرينا'}
+  ];
+}
+
+/* ============================================================
+   كشط كووورة (يعمل عبر وسيط CORS)
+   ============================================================ */
+async function fetchFromKooora(date){
+  const url = `${CONFIG.proxyUrl}${encodeURIComponent(CONFIG.koooraUrl)}`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('فشل الاتصال بكووورة');
+  const html = await res.text();
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+
+  const matches = [];
+  // ملاحظة: محددات CSS هذه تقديرية — راجع بنية HTML الفعلية
+  // وعدّلها بحسب ما تراه في المتصفح (أدوات المطور)
+  doc.querySelectorAll('.matchesList li, .match-item, tr[data-match]').forEach(el => {
+    const teams = el.querySelectorAll('.teamName, .team, .tm');
+    const time  = el.querySelector('.matchTime, .time, time');
+    const comp  = el.querySelector('.champName, .competition, .league');
+    if(teams.length >= 2){
+      matches.push({
+        competition: comp?.textContent?.trim() || '—',
+        homeTeam: teams[0].textContent.trim(),
+        awayTeam: teams[1].textContent.trim(),
+        kickoff: time?.textContent?.trim() || '',
+        venue: ''
+      });
+    }
+  });
+  if(!matches.length) throw new Error('لم يتم العثور على مباريات');
+  return matches;
+}
+
+/* ============================================================
+   أدوات مساعدة
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const todayISO = () => new Date().toISOString().slice(0,10);
+
+function fmtTime(iso){
+  try{
+    const d = new Date(iso);
+    if(isNaN(d)) return {t:'--:--', ampm:''};
+    const str = d.toLocaleTimeString('ar-EG',{
+      hour:'2-digit', minute:'2-digit', hour12:true, timeZone:CONFIG.timezone
+    });
+    const [time, ampm] = str.split(' ');
+    return {t: time.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)), ampm: ampm||''};
+  }catch{ return {t:'--:--', ampm:''}; }
+}
+
+function initials(name){
+  const clean = (name||'').replace(/^ال/,'').trim();
+  return clean.split(/\s+/)[0]?.[0] || '?';
+}
+
+/* ============================================================
+   رسم الستوري
+   ============================================================ */
+function renderStory(matches, dateStr){
+  const inner = $('storyInner');
+
+  if(!matches.length){
+    inner.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">⚽</div>
+        <div style="font-size:22px">لا توجد مباريات اليوم</div>
+      </div>`;
+    return;
+  }
+
+  const shown = matches.slice(0, CONFIG.maxMatches);
+  const rows = shown.map(m => {
+    const {t, ampm} = fmtTime(m.kickoff);
+    return `
+      <div class="match-card">
+        <div class="match-time">
+          <div class="t">${t}</div>
+          <div class="ampm">${ampm}</div>
+        </div>
+        <div class="match-teams">
+          <div class="team-row">
+            <div class="team-logo">${initials(m.homeTeam)}</div>
+            <div class="team-name">${m.homeTeam}</div>
+          </div>
+          <div class="team-row">
+            <div class="team-logo b">${initials(m.awayTeam)}</div>
+            <div class="team-name">${m.awayTeam}</div>
+          </div>
+        </div>
+        <div class="match-comp">
+          ${m.competition}
+          ${m.venue ? `<span class="venue">${m.venue}</span>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+
+  inner.innerHTML = `
+    <div class="story-header">
+      <div class="date-label">📅 ${dateStr}</div>
+      <h1>مباريات اليوم</h1>
+      <div class="sub">${shown.length} مباراة — توقيت السعودية</div>
+    </div>
+    <div class="matches-list">${rows}</div>
+    <div class="story-footer">
+      <div class="brand">⚽ جدول المباريات</div>
+      <div class="tag">تابعنا لكل جديد</div>
+    </div>`;
+}
+
+/* ============================================================
+   تحميل البيانات
+   ============================================================ */
+async function load(){
+  const date = $('datePicker').value || todayISO();
+  const dateStr = new Date(date).toLocaleDateString('ar-EG',{
+    weekday:'long', day:'numeric', month:'long'
+  });
+
+  $('storyInner').innerHTML = `<div class="empty-state"><div>جارٍ التحميل...</div></div>`;
+
+  try{
+    let matches;
+    if(CONFIG.useDemo){
+      matches = demoData(date);
+    }else{
+      matches = await fetchFromKooora(date);
+    }
+    // ترتيب حسب الوقت
+    matches.sort((a,b) => new Date(a.kickoff) - new Date(b.kickoff));
+    renderStory(matches, dateStr);
+  }catch(err){
+    $('storyInner').innerHTML = `
+      <div class="empty-state">
+        <div class="icon">⚠️</div>
+        <div style="font-size:18px">${err.message}</div>
+        <div style="font-size:14px;opacity:.6">جرّب تفعيل الوضع التجريبي</div>
+      </div>`;
+  }
+}
+
+/* ============================================================
+   تصدير الصورة 1080×1920
+   ============================================================ */
+async function downloadStory(){
+  const frame = $('storyFrame');
+  const btn = $('downloadBtn');
+  btn.textContent = '⏳ جارٍ التصدير...';
+  btn.disabled = true;
+
+  try{
+    const canvas = await html2canvas(frame, {
+      width: 1080,
+      height: 1920,
+      scale: 1,                    // الدقة مضبوطة من الأبعاد نفسها
+      backgroundColor: '#080e1f',
+      useCORS: true,
+      logging: false,
+      windowWidth: 1080,
+      windowHeight: 1920
+    });
+
+    canvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `matches-story-${$('datePicker').value}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+      btn.textContent = '✅ تم التحميل';
+      setTimeout(()=>{ btn.textContent = '⬇ تحميل الستوري'; btn.disabled = false; }, 2000);
+    }, 'image/png', 0.95);
+  }catch(err){
+    alert('فشل التصدير: ' + err.message);
+    btn.textContent = '⬇ تحميل الستوري';
+    btn.disabled = false;
+  }
+}
+
+/* ============================================================
+   التهيئة
+   ============================================================ */
+$('datePicker').value = todayISO();
+$('datePicker').addEventListener('change', load);
+$('refreshBtn').addEventListener('click', load);
+$('downloadBtn').addEventListener('click', downloadStory);
+load();
+</script>
+</body>
+</html>
